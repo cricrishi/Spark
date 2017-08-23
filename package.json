@@ -1,0 +1,28 @@
+{
+  "name": "spark",
+  "version": "1.0.0",
+  "description": "Node js Apis for [ush notification",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"this is test command\" && exit 1",
+    "start": "nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cricrishi/Spark.git"
+  },
+  "author": "rishi bhardwaj",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cricrishi/Spark/issues"
+  },
+  "homepage": "https://github.com/cricrishi/Spark#readme",
+  "devDependencies": {
+    "nodemon": "^1.11.0"
+  },
+  "dependencies": {
+    "body-parser": "^1.17.2",
+    "express": "^4.15.4",
+    "mongoose": "^4.11.7"
+  }
+}
