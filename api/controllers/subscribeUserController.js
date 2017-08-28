@@ -8,7 +8,7 @@ exports.createUser = (req, res) => {
     newUser.save( (err, user) => {
         if (err)
             res.send(err);
-        
         res.json(user);
     });
+        
 };
