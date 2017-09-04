@@ -1,23 +1,66 @@
-const express = require("express"); // express framework
+const express  = require('express');
 const app = express();
-const port = process.env.PORT || 3000;
-const mongoose = require("mongoose");
-//Parsing config file for the mongo db instance
-const config = require('config');
-const bodyParser = require('body-parser');
-mongoose.Promise = global.Promise;
-var mongo = config.get('mongo');
-mongoose.connect("mongodb://"+mongo.host+":"+mongo.port); // connect to MongoDB
-// handle incoming requests
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+const fs = require("fs");
+var mongoose = require('mongoose');
 
-require("./api/models/subscribeUser");
-require("./api/models/company");
-let routes = require("./api/routes/companyRoutes","./api/routes/subscribeUserRoutes");
-let routes1 = require("./api/routes/subscribeUserRoutes");
-routes(app); // register our routes
-routes1(app); // register our routes
+var MongoClient = require('mongodb').MongoClient;
+var url = 'mongodb://localhost:27017/test';
 
-app.listen(port); 
-console.log('App running on ' + port);
+
+var user = {
+   "user4" : {
+      "name" : "mohit",
+      "password" : "password4",
+      "profession" : "teacher",
+      "id": 4
+   }
+}
+
+
+MongoClient.connect(url, function(err, db) {
+    if(err){
+        
+        console.log(err);
+
+        return;
+
+    }
+
+    const server = app.listen(8081,function(){
+          var host = server.address().address;
+          var port = server.address().port;
+
+        console.log("Example app listening at http://%s:%s", host, port)
+    }); 
+
+  console.log("Connected correctly to bro");
+
+ 
+  db.close();
+});
+
+//api for getting user
+app.get('/listusers',function(req,res){
+    fs.readFile( __dirname + "/" + "users.json", 'utf8', function (err, data) {
+       console.log( data );
+       res.end( data );
+    });
+});
+
+//api for adding user
+app.post('/addUser',function(req,res){
+
+    fs.readFile( __dirname + "/" + "users.json", 'utf8', function (err, data) {
+       
+        data = JSON.parse( data );
+       data["user4"] = user["user4"];
+       console.log( data );
+       res.end( JSON.stringify(data));
+
+
+       res.end( data );
+    });
+
+})
+
+  
