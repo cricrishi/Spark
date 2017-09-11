@@ -1,10 +1,13 @@
 const express  = require('express');
 const app = express();
 const fs = require("fs");
+const bodyParser = require('body-parser');
 var mongoose = require('mongoose');
+
 
 var MongoClient = require('mongodb').MongoClient;
 var url = 'mongodb://localhost:27017/test';
+var db;
 
 
 var user = {
@@ -17,7 +20,9 @@ var user = {
 }
 
 
-MongoClient.connect(url, function(err, db) {
+MongoClient.connect(url, function(err, c_db) {
+     db = c_db;
+
     if(err){
         
         console.log(err);
@@ -32,19 +37,37 @@ MongoClient.connect(url, function(err, db) {
 
         console.log("Example app listening at http://%s:%s", host, port)
     }); 
+    var dummyData = {
+      "name" : "mahesh",
+      "password" : "password1",
+      "profession" : "teacher",
+      "id": "1"
+   };
+
+    db.collection('users').save(dummyData,(err,result) =>{
+        console.log("saved to db")
+    })
 
   console.log("Connected correctly to bro");
 
  
-  db.close();
+  //db.close();
 });
 
 //api for getting user
 app.get('/listusers',function(req,res){
-    fs.readFile( __dirname + "/" + "users.json", 'utf8', function (err, data) {
+    /*fs.readFile( __dirname + "/" + "users.json", 'utf8', function (err, data) {
        console.log( data );
        res.end( data );
-    });
+    });*/
+   /* var db_res =  db.collection('users').find();
+    console.log(db_res);*/
+
+    db.collection('users').find().toArray(function(err, results) {
+        console.log(err);
+        console.log(results)
+  // send HTML file populated with quotes here
+    })
 });
 
 //api for adding user
