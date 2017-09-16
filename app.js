@@ -53,6 +53,10 @@ MongoClient.connect(url, function(err, c_db) {
  
   //db.close();
 });
+app.use(bodyParser.urlencoded())
+app.use(bodyParser.json({
+  extended: true
+}))
 
 //api for getting user
 app.get('/listusers',function(req,res){
@@ -72,8 +76,20 @@ app.get('/listusers',function(req,res){
 
 //api for adding user
 app.post('/addUser',function(req,res){
+    console.log("post called");
+   /* console.log(req);*/
 
-    fs.readFile( __dirname + "/" + "users.json", 'utf8', function (err, data) {
+    console.log(req.body);
+
+    if(req.body){
+        db.collection('users').save(req.body,(err,result)=>{
+            console.log(result);
+        })
+        db.close();
+    }
+
+res.send('post message send');
+    /*fs.readFile( __dirname + "/" + "users.json", 'utf8', function (err, data) {
        
         data = JSON.parse( data );
        data["user4"] = user["user4"];
@@ -82,7 +98,7 @@ app.post('/addUser',function(req,res){
 
 
        res.end( data );
-    });
+    });*/
 
 })
 
