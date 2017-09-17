@@ -20,7 +20,21 @@ var user = {
 }
 
 
-MongoClient.connect(url, function(err, c_db) {
+
+app.use(bodyParser.urlencoded())
+app.use(bodyParser.json({
+  extended: true
+}))
+
+const options = {
+    server: {
+        socketOptions: {
+            keepalive: 1
+        }
+    }
+};
+
+MongoClient.connect(url,options, function(err, c_db) {
      db = c_db;
 
     if(err){
@@ -44,36 +58,52 @@ MongoClient.connect(url, function(err, c_db) {
       "id": "1"
    };
 
-    db.collection('users').save(dummyData,(err,result) =>{
+   /* db.collection('users').save(dummyData,(err,result) =>{
         console.log("saved to db")
-    })
+    })*/
 
   console.log("Connected correctly to bro");
 
  
-  //db.close();
+ 
 });
-app.use(bodyParser.urlencoded())
-app.use(bodyParser.json({
-  extended: true
-}))
+
 
 //api for getting user
 app.get('/listusers',function(req,res){
-    /*fs.readFile( __dirname + "/" + "users.json", 'utf8', function (err, data) {
-       console.log( data );
-       res.end( data );
-    });*/
-   /* var db_res =  db.collection('users').find();
-    console.log(db_res);*/
+    db.collection('users').find().toArray(function(err,result){
+        if(err){
+            console.log(err);
+            return;
+        }
+        console.log(result);
+        //db.close();
+        
 
-    db.collection('users').find().toArray(function(err, results) {
-        console.log(err);
-        console.log(results)
-  // send HTML file populated with quotes here
     })
+    res.send('users displayed in terminla');
 });
 
+
+
+app.get('/dropCl',function(req,res){
+
+    
+    db.collection('users').drop(function(err,suc){
+        if(err){
+            console.log(err);
+            return;
+        }
+
+        console.log("successfully droped collectoin");
+        db.close();
+
+    })
+
+      res.send('users collectoin dropped');
+
+
+})
 //api for adding user
 app.post('/addUser',function(req,res){
     console.log("post called");
@@ -82,10 +112,13 @@ app.post('/addUser',function(req,res){
     console.log(req.body);
 
     if(req.body){
-        db.collection('users').save(req.body,(err,result)=>{
-            console.log(result);
+        db.collection('users').insertOne(req.body,(err,result)=>{
+            //console.log(result);
+            if (err) throw err;
+            console.log("1 document inserted");
+            db.close();
         })
-        db.close();
+       
     }
 
 res.send('post message send');
