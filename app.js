@@ -35,9 +35,10 @@ const options = {
 };
 
 MongoClient.connect(url,options, function(err, c_db) {
+    console.log("mongo connection test");
      db = c_db;
 
-    if(err){
+    if(err){                                                                                                    
         
         console.log(err);
 
@@ -50,6 +51,7 @@ MongoClient.connect(url,options, function(err, c_db) {
           var port = server.address().port;
 
         console.log("Example app listening at http://%s:%s", host, port)
+        db.close();
     }); 
     var dummyData = {
       "name" : "mahesh",
@@ -71,16 +73,22 @@ MongoClient.connect(url,options, function(err, c_db) {
 
 //api for getting user
 app.get('/listusers',function(req,res){
+
+   db.open(function(err,res){
+
     db.collection('users').find().toArray(function(err,result){
         if(err){
             console.log(err);
             return;
         }
         console.log(result);
-        //db.close();
+        db.close();
         
 
     })
+
+   }) 
+    
     res.send('users displayed in terminla');
 });
 
@@ -112,16 +120,23 @@ app.post('/addUser',function(req,res){
     console.log(req.body);
 
     if(req.body){
+     
+     db.open(function(err,sucess){
+
         db.collection('users').insertOne(req.body,(err,result)=>{
             //console.log(result);
             if (err) throw err;
             console.log("1 document inserted");
             db.close();
         })
+
+     })
+        
        
     }
 
 res.send('post message send');
+res.end();
     /*fs.readFile( __dirname + "/" + "users.json", 'utf8', function (err, data) {
        
         data = JSON.parse( data );
