@@ -24,6 +24,8 @@
     "body-parser": "^1.17.2",
     "config": "^1.26.2",
     "express": "^4.15.4",
-    "mongoose": "^4.11.10"
+    "firebase-admin": "^5.2.1",
+    "mongoose": "^4.11.10",
+    "web-push": "^3.2.3"
   }
 }
