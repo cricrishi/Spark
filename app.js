@@ -14,7 +14,7 @@ var serviceAccount = require("./serviceAccountKesy.json");
 var MongoClient = require('mongodb').MongoClient;
 var url = 'mongodb://localhost:27017/test';
 var db;
-
+var registrationTokenList = [];
 
 
 
@@ -59,18 +59,26 @@ MongoClient.connect(url,options, function(err, c_db) {
  
 });
 
+function formateResult(result){
+    registrationTokenList = result.map(function(item){
+        return item.id;
+    })
+
+}
+
 
 //api for getting user
 app.get('/listusers',function(req,res){
 
    db.open(function(err,res){
 
-    db.collection('users').find().toArray(function(err,result){
+    db.collection('users').find({},{_id:0,id:1}).toArray(function(err,result){
         if(err){
             console.log(err);
             return;
         }
-        console.log(result);
+        formateResult(result);
+        console.log(registrationTokenList);
         db.close();
         
 
@@ -86,7 +94,7 @@ app.get('/listusers',function(req,res){
 app.get('/dropCl',function(req,res){
 
 
-    db.open(function(err,res){
+    db.open(function(err,sucess){
         db.collection('users').drop(function(err,suc){
             if(err){
                 console.log(err);
@@ -98,7 +106,7 @@ app.get('/dropCl',function(req,res){
 
         })
 
-      res.send('users collectoin dropped');
+      res.end();
 
 
 
@@ -151,15 +159,14 @@ app.get('/sendMsg',function(req,res){
        }) */
         
        //var registrationToken = "frcSHs5RCKw:APA91bH476UD0M8RdrUWaQmVy7cWoMIR1v8ojtQCrp6Cn5aqQ1O4bUTfimAkqu5uTGOkhvI6p06Ksai1n3roHrfdFUhdNdhDf-YUqvO4yOEwjdqqTx8NZzK4YZNzR7yX8DUITnhsCOCd";
-        var registrationToken ="f-dmZwaU3es:APA91bGH6UycV5GIplaf8j9-GEfe4RPMeaNSDEcRYzl-RBOQ4neYMAFHRgk5df7JGImWBirHM_wUqhJ7EUPbEt2hu8i8duc7VDMhVvjVE5G3WySsGnvXdKxAOthoqm0o4VBuQG8PMy91";     
-      var payload = {
+        var payload = {
               data: {
                 message: "Push Message",
                 title: "Push Title"
               }
         }; 
 
-    admin.messaging().sendToDevice(registrationToken, payload)
+    admin.messaging().sendToDevice(registrationTokenList, payload)
   .then(function(response) {
     // See the MessagingDevicesResponse reference documentation for
     // the contents of response.
