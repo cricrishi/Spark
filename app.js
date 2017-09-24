@@ -64,6 +64,53 @@ function formateResult(result){
         return item.id;
     })
 
+    console.log(registrationTokenList);
+
+}
+
+
+function retrieveUser(compId){
+    var query = {compId:compId};
+    var projection = {_id:0,id:1};
+
+    db.open(function(err,res){
+        if(err){
+            console.log("error in db handling" + err);
+        }
+        db.collection('users').find(query,projection).toArray(function(err,result){
+            if(err){
+                console.log(err);
+                return;
+            }
+            formateResult(result);
+             sendMessage();
+            db.close();
+        })
+    })
+    
+};
+
+
+
+function sendMessage(){
+    var payload = {
+              data: {
+                message: "Push Message",
+                title: "Push Title"
+              }
+        }; 
+
+        //console.log(registrationTokenList);
+
+    admin.messaging().sendToDevice(registrationTokenList, payload)
+  .then(function(response) {
+    console.log("Successfully sent message:", response);
+    res.end();
+  })
+  .catch(function(error) {
+    console.log("Error sending message:", error);
+    res.end();
+  });
 }
 
 
@@ -72,13 +119,13 @@ app.get('/listusers',function(req,res){
 
    db.open(function(err,res){
 
-    db.collection('users').find({},{_id:0,id:1}).toArray(function(err,result){
+    db.collection('users').find({},{_id:0,id:1,compId:1}).toArray(function(err,result){
         if(err){
             console.log(err);
             return;
         }
         formateResult(result);
-        console.log(registrationTokenList);
+        console.log(result);
         db.close();
         
 
@@ -141,24 +188,21 @@ app.post('/addUser',function(req,res){
 })
 
 
-app.get('/sendMsg',function(req,res){
+app.post('/sendMsg',function(req,res){
 
-    /*db.open(function(err,res){
+    var compId = req.body.compId;
+    
 
-        db.collection('users').find().toArray(function(err,result){
-            if(err){
-                console.log(err);
-                return;
-            }
-            console.log(result);
-            db.close();
-            
+    retrieveUser(compId);
+   
 
-        })
 
-       }) */
+    res.send('Given compId-' + req.body.compId);
+    res.end();
+
+   
         
-       //var registrationToken = "frcSHs5RCKw:APA91bH476UD0M8RdrUWaQmVy7cWoMIR1v8ojtQCrp6Cn5aqQ1O4bUTfimAkqu5uTGOkhvI6p06Ksai1n3roHrfdFUhdNdhDf-YUqvO4yOEwjdqqTx8NZzK4YZNzR7yX8DUITnhsCOCd";
+/*
         var payload = {
               data: {
                 message: "Push Message",
@@ -168,15 +212,13 @@ app.get('/sendMsg',function(req,res){
 
     admin.messaging().sendToDevice(registrationTokenList, payload)
   .then(function(response) {
-    // See the MessagingDevicesResponse reference documentation for
-    // the contents of response.
     console.log("Successfully sent message:", response);
     res.end();
   })
   .catch(function(error) {
     console.log("Error sending message:", error);
     res.end();
-  });
+  });*/
     
 
 
