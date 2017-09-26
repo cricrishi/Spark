@@ -3,16 +3,14 @@ const app = express();
 const fs = require("fs");
 const bodyParser = require('body-parser');
 var admin = require("firebase-admin");
-//const webpush = require('web-push');
 var mongoose = require('mongoose');
 var serviceAccount = require("./serviceAccountKesy.json");
+const EventEmitter = require('events');
 
-
-//const vapidKeys = webpush.generateVAPIDKeys();
-
-
+class MyEmitter extends EventEmitter {};
+const myEmitter = new MyEmitter();
 var MongoClient = require('mongodb').MongoClient;
-var url = 'mongodb://localhost:27017/test';
+var url = 'mongodb://localhost:27017/test'; 
 var db;
 var registrationTokenList = [];
 
@@ -60,35 +58,51 @@ MongoClient.connect(url,options, function(err, c_db) {
 });
 
 function formateResult(result){
-    registrationTokenList = result.map(function(item){
-        return item.id;
-    })
-
-    console.log(registrationTokenList);
+    registrationTokenList = result.map(item => item.id);
 
 }
 
 
-function retrieveUser(compId){
+function retrieveUser(compId,callback){
     var query = {compId:compId};
     var projection = {_id:0,id:1};
 
+    
+
     db.open(function(err,res){
         if(err){
-            console.log("error in db handling" + err);
+          myEmitter.emit('dbOpenError',err);
         }
         db.collection('users').find(query,projection).toArray(function(err,result){
             if(err){
-                console.log(err);
-                return;
+                myEmitter.emit('userFindError',err);
+            } else{
+                myEmitter.emit('sendMessage',result);
+                
+
             }
-            formateResult(result);
-             sendMessage();
+
+
+            
             db.close();
         })
     })
     
 };
+
+
+myEmitter.on('dbOpenError',(err)=>{
+    console.log("Error occured while opening DB :",err);
+});
+
+myEmitter.on('userFindError',(err)=>{
+    console.log("Error occured while finding users:",err);
+});
+
+myEmitter.on('sendMessage',(res)=>{  
+    sendMessage(formateResult(res));
+})
+
 
 
 
@@ -105,11 +119,9 @@ function sendMessage(){
     admin.messaging().sendToDevice(registrationTokenList, payload)
   .then(function(response) {
     console.log("Successfully sent message:", response);
-    res.end();
   })
   .catch(function(error) {
     console.log("Error sending message:", error);
-    res.end();
   });
 }
 
@@ -191,34 +203,13 @@ app.post('/addUser',function(req,res){
 app.post('/sendMsg',function(req,res){
 
     var compId = req.body.compId;
-    
-
-    retrieveUser(compId);
+    retrieveUser(compId,sendMessage);
    
-
-
     res.send('Given compId-' + req.body.compId);
     res.end();
 
    
-        
-/*
-        var payload = {
-              data: {
-                message: "Push Message",
-                title: "Push Title"
-              }
-        }; 
 
-    admin.messaging().sendToDevice(registrationTokenList, payload)
-  .then(function(response) {
-    console.log("Successfully sent message:", response);
-    res.end();
-  })
-  .catch(function(error) {
-    console.log("Error sending message:", error);
-    res.end();
-  });*/
     
 
 
